@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Interativo de Desenvolvimento Web Seguro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #2563eb; /* blue-600 */
+            border-bottom-color: #2563eb; /* blue-600 */
+        }
+        .section-content {
+            display: none;
+        }
+        .section-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 450px;
+            max-height: 60vh;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        .ssdlc-stage {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .ssdlc-stage:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .ssdlc-arrow {
+            font-size: 2rem;
+            color: #94a3b8; /* slate-400 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold text-slate-700">DevSec Guide</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a class="nav-link active" data-target="home">Visão Geral</a>
+                    <a class="nav-link" data-target="principles">Princípios</a>
+                    <a class="nav-link" data-target="ssdlc">Ciclo de Vida</a>
+                    <a class="nav-link" data-target="owasp">OWASP Top 10</a>
+                    <a class="nav-link" data-target="tools">Ferramentas</a>
+                    <a class="nav-link" data-target="standards">Padrões</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="home">Visão Geral</option>
+                        <option value="principles">Princípios</option>
+                        <option value="ssdlc">Ciclo de Vida</option>
+                        <option value="owasp">OWASP Top 10</option>
+                        <option value="tools">Ferramentas</option>
+                        <option value="standards">Padrões</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="home" class="section-content active">
+            <div class="text-center bg-white p-8 rounded-xl shadow-lg border border-slate-100">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-600 mb-4">Introdução ao Desenvolvimento de Software Seguro para Web</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                    Bem-vindo a este guia interativo. A segurança de aplicações web não é mais um diferencial, mas uma necessidade imperativa. Explore as seções para entender os princípios, vulnerabilidades e ferramentas essenciais para construir aplicações robustas e resilientes contra as ameaças cibernéticas.
+                </p>
+            </div>
+
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-center text-slate-700 mb-6">A Imperatividade da Segurança em Números</h3>
+                 <p class="text-center text-slate-500 mb-8 max-w-2xl mx-auto">A segurança é um investimento estratégico indispensável. A negligência pode resultar em custos financeiros substanciais, danos à reputação e riscos operacionais significativos, impulsionados por um cenário de ameaças em constante evolução.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 text-center flex flex-col justify-center">
+                        <span class="text-5xl font-extrabold text-red-500">US$ 10.5 Trilhões</span>
+                        <p class="mt-3 text-slate-600 font-medium">Custo global anual estimado do cibercrime até 2025.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 text-center flex flex-col justify-center">
+                         <span class="text-5xl font-extrabold text-green-500">US$ 783 Bilhões</span>
+                        <p class="mt-3 text-slate-600 font-medium">Investimento global em software empresarial em 2022, um aumento de 7.1%.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="principles" class="section-content">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800">Princípios Fundamentais para um Design Seguro</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600 mt-4">
+                    A base de um software seguro reside em princípios sólidos. Estes conceitos orientam a criação de sistemas resilientes desde a sua concepção, promovendo uma cultura de segurança proativa. Explore os pilares estabelecidos pelo NIST e pela OWASP para entender como construir defesa em profundidade.
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+                <div class="flex justify-center mb-6 border-b border-slate-200">
+                    <button class="tab-button py-2 px-6 font-semibold text-slate-600 rounded-t-md active" data-tab="nist">NIST SSDF</button>
+                    <button class="tab-button py-2 px-6 font-semibold text-slate-600 rounded-t-md" data-tab="owasp-principles">OWASP</button>
+                </div>
+
+                <div id="nist" class="tab-content active">
+                    <h3 class="text-xl font-bold text-blue-600 mb-4 text-center">Pilares do NIST Secure Software Development Framework (SSDF)</h3>
+                    <div class="grid md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-slate-700">Segurança por Design</h4>
+                            <p class="text-sm text-slate-600 mt-2">Integrar a segurança desde as fases iniciais do projeto, tornando a mitigação de vulnerabilidades mais simples e menos custosa.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-slate-700">Melhoria Contínua</h4>
+                            <p class="text-sm text-slate-600 mt-2">A segurança é um processo contínuo de atualização de práticas e ferramentas para responder a novas ameaças.</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-slate-700">Gerenciamento de Riscos</h4>
+                            <p class="text-sm text-slate-600 mt-2">Compreender, avaliar e mitigar ameaças, alinhando os esforços de segurança com as estratégias de negócios.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="owasp-principles" class="tab-content hidden">
+                    <h3 class="text-xl font-bold text-blue-600 mb-4 text-center">Conceitos Fundamentais da OWASP</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Defesa em Profundidade:</strong> Múltiplas camadas de controle para proteger ativos.</div>
+                        <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Menor Privilégio:</strong> Conceder apenas o acesso mínimo necessário para cada tarefa.</div>
+                        <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Zero Trust:</strong> Assumir que nenhum usuário ou dispositivo é confiável por padrão; verificar sempre.</div>
+                        <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Segurança por Padrão:</strong> As configurações padrão devem ser as mais seguras possíveis.</div>
+                        <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Fail Safe / Fail Secure:</strong> Em caso de erro, o sistema deve falhar para um estado seguro.</div>
+                         <div class="bg-slate-50 p-3 rounded-lg"><strong class="text-slate-700">Nunca Confie nos Dados do Navegador:</strong> Validar e sanitizar rigorosamente toda a entrada do usuário.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ssdlc" class="section-content">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800">Integrando Segurança no Ciclo de Vida (SSDLC & DevSecOps)</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600 mt-4">
+                    A segurança deve ser uma responsabilidade compartilhada e contínua. O SSDLC estrutura a segurança em cada fase do desenvolvimento, enquanto o DevSecOps promove uma cultura de colaboração. Clique em cada estágio abaixo para ver as atividades de segurança associadas.
+                </p>
+            </div>
+
+            <div id="ssdlc-timeline" class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+            </div>
+
+            <div id="ssdlc-details" class="mt-8 bg-white p-6 rounded-xl shadow-lg border border-slate-100 min-h-[150px]">
+                <h3 id="ssdlc-details-title" class="text-xl font-bold text-blue-600 mb-2"></h3>
+                <p id="ssdlc-details-content" class="text-slate-600"></p>
+            </div>
+        </section>
+
+        <section id="owasp" class="section-content">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800">As 10 Vulnerabilidades Mais Críticas: OWASP Top 10 (2021)</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600 mt-4">
+                    O OWASP Top 10 é um documento de conscientização que representa um consenso sobre os riscos mais críticos para aplicações web. Clique em uma vulnerabilidade no gráfico para explorar sua descrição, exemplos e estratégias de mitigação.
+                </p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3 bg-white p-4 rounded-xl shadow-lg border border-slate-100">
+                    <div class="chart-container">
+                        <canvas id="owaspTop10Chart"></canvas>
+                    </div>
+                </div>
+                <div id="owasp-details" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+                    <h3 id="owasp-details-title" class="text-xl font-bold text-blue-600 mb-2">Selecione uma vulnerabilidade</h3>
+                    <p id="owasp-details-desc" class="text-slate-600 mb-4">Clique em uma das barras do gráfico ao lado para ver os detalhes aqui.</p>
+                    <div id="owasp-details-example-container" class="hidden">
+                        <h4 class="font-semibold text-slate-700">Exemplo Ilustrativo:</h4>
+                        <p id="owasp-details-example" class="text-sm text-slate-600 bg-slate-50 p-3 rounded-md mt-1"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tools" class="section-content">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800">Ferramentas e Tecnologias Essenciais</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600 mt-4">
+                    Um arsenal de ferramentas é fundamental para automatizar e fortalecer a segurança em todo o ciclo de vida. Conheça as principais categorias de ferramentas que ajudam a detectar, proteger e monitorar aplicações web.
+                </p>
+            </div>
+            <div id="tools-accordion" class="space-y-4">
+            </div>
+        </section>
+
+        <section id="standards" class="section-content">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-800">Padrões e Frameworks Globais</h2>
+                 <p class="max-w-3xl mx-auto text-lg text-slate-600 mt-4">
+                    A adoção de padrões globais fornece diretrizes estruturadas para a implementação de controles de segurança. Eles garantem a conformidade e promovem as melhores práticas reconhecidas pela indústria.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+                    <h3 class="font-bold text-xl text-blue-600">OWASP ASVS</h3>
+                    <p class="mt-2 text-slate-600">O Application Security Verification Standard oferece um checklist técnico detalhado para avaliar controles de segurança, com 3 níveis de garantia para diferentes perfis de risco.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+                    <h3 class="font-bold text-xl text-blue-600">NIST CSF</h3>
+                    <p class="mt-2 text-slate-600">O Cybersecurity Framework oferece uma abordagem baseada em risco estruturada em 5 funções: Identificar, Proteger, Detectar, Responder e Recuperar.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-100">
+                    <h3 class="font-bold text-xl text-blue-600">ISO 27001 & PCI DSS</h3>
+                    <p class="mt-2 text-slate-600">Padrões de conformidade que são catalisadores para a adoção de práticas seguras, especialmente em setores regulados, institucionalizando a segurança no SDLC.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 mt-12 border-t border-slate-200">
+        <p class="text-slate-500 text-sm">Aplicação interativa gerada a partir do relatório "Introdução ao Desenvolvimento de Software Seguro para Web".</p>
+    </footer>
+
+    <script>
+        const sections = document.querySelectorAll('.section-content');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        const owaspData = [
+            { id: 'A01', name: 'Broken Access Control', description: 'Falhas na aplicação de controles de acesso que permitem que usuários ajam além de suas permissões pretendidas.', example: 'Um atacante modifica o parâmetro `id` em uma URL (de `/conta?id=123` para `/conta?id=124`) para acessar informações de conta de outros usuários sem autorização.' },
+            { id: 'A02', name: 'Cryptographic Failures', description: 'Falhas relacionadas à criptografia que resultam na exposição de dados sensíveis. Anteriormente conhecido como "Sensitive Data Exposure".', example: 'Dados sensíveis, como senhas ou números de cartão de crédito, são armazenados em texto plano no banco de dados ou transmitidos sem criptografia (HTTP em vez de HTTPS).' },
+            { id: 'A03', name: 'Injection', description: 'Injeção de dados não confiáveis em um interpretador de código, como SQL, NoSQL, ou OS Commands. Inclui Cross-Site Scripting (XSS).', example: 'Um atacante insere `admin\' OR \'1\'=\'1` em um campo de login, alterando a consulta SQL para contornar a autenticação e obter acesso.' },
+            { id: 'A04', name: 'Insecure Design', description: 'Uma nova categoria focada em falhas de design que podem levar a vulnerabilidades, mesmo com uma implementação perfeita.', example: 'Um sistema de recuperação de senha que usa perguntas de segurança cujas respostas são facilmente adivinháveis ou publicamente conhecidas (ex: "Qual o nome da sua mãe?").' },
+            { id: 'A05', name: 'Security Misconfiguration', description: 'Configurações de segurança incorretas, como configurações padrão inseguras, permissões de nuvem abertas ou mensagens de erro detalhadas.', example: 'Deixar um bucket de armazenamento em nuvem (como Amazon S3) publicamente acessível, expondo arquivos sensíveis a qualquer pessoa na internet.' },
+            { id: 'A06', name: 'Vulnerable and Outdated Components', description: 'Uso de componentes de software (bibliotecas, frameworks) com vulnerabilidades conhecidas ou que estão desatualizados.', example: 'Uma aplicação que utiliza uma versão antiga de uma biblioteca como jQuery ou Log4j, que possui vulnerabilidades de segurança publicamente documentadas e exploráveis.' },
+            { id: 'A07', name: 'Identification and Authentication Failures', description: 'Falhas relacionadas à identificação e autenticação de usuários, como senhas fracas ou falta de autenticação multifator (MFA).', example: 'Permitir senhas fracas como "123456" ou não implementar um mecanismo de bloqueio de conta após várias tentativas de login falhas, facilitando ataques de força bruta.' },
+            { id: 'A08', name: 'Software and Data Integrity Failures', description: 'Falhas relacionadas à integridade de software e dados, como atualizações não verificadas ou desserialização insegura.', example: 'Uma aplicação que desserializa objetos de fontes não confiáveis sem validação, permitindo que um atacante execute código arbitrário no servidor.' },
+            { id: 'A09', name: 'Security Logging and Monitoring Failures', description: 'Registro e monitoramento de segurança insuficientes, dificultando a detecção e resposta a ataques.', example: 'Não registrar ou alertar sobre múltiplas tentativas de login falhas, permitindo que um atacante tente adivinhar senhas por um longo período sem ser detectado.' },
+            { id: 'A10', name: 'Server-Side Request Forgery (SSRF)', description: 'Ocorre quando uma aplicação busca um recurso remoto sem validar a URL fornecida pelo usuário, permitindo forjar requisições do lado do servidor.', example: 'Um atacante manipula uma funcionalidade de "importar imagem de URL" para fazer a aplicação acessar um serviço interno da rede, como `http://192.168.1.5/admin`.' }
+        ];
+
+        const ssdlcData = [
+            { name: 'Requisitos', details: 'Definição clara dos requisitos de segurança, como criptografia de dados, autenticação robusta e controles de acesso granulares.' },
+            { name: 'Design', details: 'Desenvolvimento de uma arquitetura segura para reduzir a superfície de ataque e incorporar controles de segurança desde o início (Modelagem de Ameaças).' },
+            { name: 'Implementação', details: 'Aplicação de práticas de codificação segura (ex: guias da OWASP) para minimizar vulnerabilidades no código-fonte.' },
+            { name: 'Testes', details: 'Execução de testes rigorosos, incluindo Análise Estática (SAST), Dinâmica (DAST) e Testes de Penetração para identificar e corrigir falhas.' },
+            { name: 'Implantação', details: 'Implementação de medidas de segurança no ambiente de produção, como configurações seguras de servidor, WAFs e proteção de rede.' },
+            { name: 'Manutenção', details: 'Atualização regular do software (patching), monitoramento contínuo de incidentes de segurança e resposta a novas ameaças.' },
+        ];
+        
+        const toolsData = [
+            { name: 'SAST (Static Application Security Testing)', details: 'Analisa o código-fonte ou binário em busca de vulnerabilidades sem executar a aplicação. Permite a detecção precoce de falhas no ambiente de desenvolvimento.' },
+            { name: 'DAST (Dynamic Application Security Testing)', details: 'Analisa a aplicação em execução, simulando ataques externos (black-box). Eficaz para encontrar vulnerabilidades como SQL Injection e XSS em um ambiente de teste.' },
+            { name: 'IAST (Interactive Application Security Testing)', details: 'Combina SAST e DAST, analisando o código enquanto a aplicação está em execução. Fornece feedback em tempo real com a localização exata da vulnerabilidade no código.' },
+            { name: 'SCA (Software Composition Analysis)', details: 'Identifica componentes de código aberto e de terceiros em uma aplicação, verificando-os contra bancos de dados de vulnerabilidades conhecidas. Essencial para gerenciar a segurança da cadeia de suprimentos de software.' },
+            { name: 'WAF (Web Application Firewall)', details: 'Filtra, monitora e bloqueia o tráfego HTTP/S malicioso, atuando como uma barreira de proteção na camada de aplicação contra ataques comuns.' },
+            { name: 'API Security Gateway', details: 'Atua como um ponto de entrada único para APIs, aplicando políticas de segurança, autenticação, autorização e rate limiting para proteger os serviços de backend.' }
+        ];
+
+        function showSection(targetId) {
+            sections.forEach(section => {
+                section.classList.toggle('active', section.id === targetId);
+            });
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.dataset.target === targetId);
+            });
+             mobileNav.value = targetId;
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSection(e.target.dataset.target);
+            });
+        });
+        
+        mobileNav.addEventListener('change', (e) => {
+            showSection(e.target.value);
+        });
+
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                tabContents.forEach(content => {
+                    content.classList.toggle('hidden', content.id !== button.dataset.tab);
+                });
+            });
+        });
+
+        const owaspCtx = document.getElementById('owaspTop10Chart').getContext('2d');
+        const owaspChart = new Chart(owaspCtx, {
+            type: 'bar',
+            data: {
+                labels: owaspData.map(item => `${item.id}: ${item.name}`),
+                datasets: [{
+                    label: 'Criticidade (Baseada na Ordem)',
+                    data: owaspData.map((_, i) => 10 - i),
+                    backgroundColor: 'rgba(37, 99, 235, 0.6)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` Posição: ${context.raw}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { display: false }
+                    },
+                    y: {
+                       ticks: {
+                           autoSkip: false,
+                           font: {
+                               size: 11
+                           }
+                       }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const data = owaspData[index];
+                        document.getElementById('owasp-details-title').textContent = `${data.id}: ${data.name}`;
+                        document.getElementById('owasp-details-desc').textContent = data.description;
+                        document.getElementById('owasp-details-example').textContent = data.example;
+                        document.getElementById('owasp-details-example-container').classList.remove('hidden');
+                    }
+                }
+            }
+        });
+        
+        const timelineContainer = document.getElementById('ssdlc-timeline');
+        ssdlcData.forEach((stage, index) => {
+            const stageEl = document.createElement('div');
+            stageEl.className = 'ssdlc-stage bg-white text-center p-4 rounded-lg shadow-md border border-slate-200 w-40';
+            stageEl.innerHTML = `<h4 class="font-semibold text-slate-700">${stage.name}</h4>`;
+            stageEl.dataset.index = index;
+            timelineContainer.appendChild(stageEl);
+            
+            if(index < ssdlcData.length - 1) {
+                const arrowEl = document.createElement('div');
+                arrowEl.className = 'ssdlc-arrow flex items-center justify-center transform md:rotate-0 rotate-90';
+                arrowEl.innerHTML = '&#8594;';
+                timelineContainer.appendChild(arrowEl);
+            }
+        });
+        
+        const ssdlcStages = document.querySelectorAll('.ssdlc-stage');
+        const detailsTitle = document.getElementById('ssdlc-details-title');
+        const detailsContent = document.getElementById('ssdlc-details-content');
+
+        ssdlcStages.forEach(stage => {
+            stage.addEventListener('click', () => {
+                const index = stage.dataset.index;
+                detailsTitle.textContent = ssdlcData[index].name;
+                detailsContent.textContent = ssdlcData[index].details;
+                ssdlcStages.forEach(s => s.classList.remove('ring-2', 'ring-blue-500'));
+                stage.classList.add('ring-2', 'ring-blue-500');
+            });
+        });
+        
+        ssdlcStages[0].click();
+        
+        const accordionContainer = document.getElementById('tools-accordion');
+        toolsData.forEach((tool, index) => {
+            const item = document.createElement('div');
+            item.className = 'bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden';
+            item.innerHTML = `
+                <button class="w-full text-left p-4 flex justify-between items-center" data-accordion-target="tool-${index}">
+                    <h3 class="font-semibold text-lg text-slate-700">${tool.name}</h3>
+                    <span class="transform transition-transform duration-300">&#9662;</span>
+                </button>
+                <div id="tool-${index}" class="px-4 pb-4 text-slate-600 hidden">
+                    <p>${tool.details}</p>
+                </div>
+            `;
+            accordionContainer.appendChild(item);
+        });
+        
+        document.querySelectorAll('[data-accordion-target]').forEach(button => {
+            button.addEventListener('click', () => {
+                const targetId = button.dataset.accordionTarget;
+                const targetPanel = document.getElementById(targetId);
+                const arrow = button.querySelector('span');
+                
+                const isExpanded = targetPanel.style.maxHeight;
+                
+                if (isExpanded) {
+                    targetPanel.style.maxHeight = null;
+                    targetPanel.classList.add('hidden');
+                    arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    targetPanel.classList.remove('hidden');
+                    targetPanel.style.maxHeight = targetPanel.scrollHeight + "px";
+                    arrow.style.transform = 'rotate(180deg)';
+                } 
+            });
+        });
+
+        // Initialize first view
+        showSection('home');
+    </script>
+</body>
+</html>

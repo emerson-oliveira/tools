@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório Interativo: A01:2021 - Broken Access Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-link:hover {
+            color: #0284c7; /* sky-600 */
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #0284c7; /* sky-600 */
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .tech-button.active {
+            background-color: #0ea5e9; /* sky-500 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .code-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+        }
+        .code-block .comment { color: #94a3b8; } /* slate-400 */
+        .code-block .keyword { color: #7dd3fc; } /* light-blue-300 */
+        .code-block .function { color: #a5b4fc; } /* indigo-300 */
+        .code-block .string { color: #fcd34d; } /* amber-300 */
+        .code-block .variable { color: #f8fafc; } /* slate-50 */
+        .code-block .error { color: #f87171; background-color: rgba(239, 68, 68, 0.2); } /* red-400 */
+        .code-block .success { color: #4ade80; background-color: rgba(74, 222, 128, 0.2); } /* green-400 */
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-sky-600">A01:2021</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">Panorama</a>
+                        <a href="#attacks" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">Ataques</a>
+                        <a href="#playbook" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">Defesa</a>
+                        <a href="#tech" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">Tecnologias</a>
+                        <a href="#testing" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-700">Testes</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="py-16 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
+                <span class="block">Controle de Acesso Quebrado</span>
+                <span class="block text-sky-600">A Vulnerabilidade Nº 1 da OWASP</span>
+            </h1>
+            <p class="mt-6 max-w-3xl mx-auto text-lg text-slate-600">
+                Esta aplicação interativa explora a A01:2021-Broken Access Control, a falha de segurança mais prevalente e crítica em aplicações web modernas. Navegue pelas seções para entender, identificar e mitigar este risco fundamental.
+            </p>
+
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-400">
+                    <h3 class="text-4xl font-bold text-amber-500">Nº 1</h3>
+                    <p class="mt-2 text-slate-600 font-medium">Risco na OWASP Top 10 2021</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                    <h3 class="text-4xl font-bold text-red-600">94%</h3>
+                    <p class="mt-2 text-slate-600 font-medium">Das aplicações testadas apresentaram esta falha</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-sky-500">
+                    <h3 class="text-4xl font-bold text-sky-600">Autorização</h3>
+                    <p class="mt-2 text-slate-600 font-medium">A essência do problema está em "o que você pode fazer"</p>
+                </div>
+            </div>
+
+            <div class="mt-16 bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold text-center mb-4 text-slate-800">Prevalência das Vulnerabilidades (Dados Ilustrativos)</h2>
+                <p class="text-center text-slate-500 mb-6">Broken Access Control se destaca como a categoria com a maior incidência, afetando a grande maioria das aplicações.</p>
+                <div class="chart-container">
+                    <canvas id="prevalenceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Attacks -->
+        <section id="attacks" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900">Entendendo os Ataques</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">Falhas de controle de acesso se manifestam de duas formas principais: escalada vertical e horizontal. Explore os exemplos interativos abaixo para ver como elas funcionam.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <div class="mb-6 border-b border-slate-200">
+                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                        <button id="tab-vertical" class="tab-button active text-sky-600 border-sky-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Escalada Vertical
+                        </button>
+                        <button id="tab-horizontal" class="tab-button text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Escalada Horizontal
+                        </button>
+                    </nav>
+                </div>
+                
+                <div id="content-vertical" class="tab-content">
+                    <h3 class="text-xl font-bold text-slate-800">Escalada de Privilégios Vertical (Subir na Hierarquia)</h3>
+                    <p class="mt-2 text-slate-600">Ocorre quando um usuário comum obtém acesso a funcionalidades de um usuário com privilégios mais altos, como um administrador.</p>
+                    <div class="mt-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="font-semibold text-slate-700">Exemplo: Navegação Forçada (Forced Browse)</h4>
+                        <p class="text-sm text-slate-500 mt-1">Um usuário comum, após o login, digita uma URL de administrador diretamente no navegador.</p>
+                        <div class="mt-4 flex items-center space-x-2 bg-white p-2 rounded-md border">
+                            <span class="text-slate-400">https://app.exemplo.com/</span>
+                            <input type="text" value="dashboard" class="flex-grow min-w-0 p-1 rounded focus:outline-none focus:ring-2 focus:ring-sky-500" readonly>
+                        </div>
+                        <p class="mt-4 text-sm text-slate-600">O usuário tenta adivinhar o caminho para o painel de administração:</p>
+                        <div class="mt-2 flex items-center space-x-2 bg-white p-2 rounded-md border border-sky-300">
+                            <span class="text-slate-400">https://app.exemplo.com/</span>
+                            <input type="text" value="admin" class="flex-grow min-w-0 p-1 rounded font-mono text-sky-600" readonly>
+                        </div>
+                        <div class="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">
+                            <p class="font-bold">Resultado da Falha:</p>
+                            <p>Se não houver uma verificação de permissão no backend para a rota `/admin`, o usuário obtém acesso total ao painel administrativo, podendo visualizar dados de todos os usuários, alterar configurações e mais.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-horizontal" class="tab-content hidden">
+                    <h3 class="text-xl font-bold text-slate-800">Escalada de Privilégios Horizontal (Mover-se Lateralmente)</h3>
+                    <p class="mt-2 text-slate-600">Ocorre quando um usuário acessa dados ou funcionalidades pertencentes a outro usuário com o mesmo nível de permissão.</p>
+                    <div class="mt-6 bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="font-semibold text-slate-700">Exemplo Interativo: IDOR (Insecure Direct Object Reference)</h4>
+                        <p class="text-sm text-slate-500 mt-1">Um usuário está visualizando sua própria fatura. O ID da fatura está exposto na URL. Tente alterar o ID para ver o que acontece.</p>
+                        <div class="mt-4 flex items-center space-x-2 bg-white p-2 rounded-md border">
+                            <span class="text-slate-400">https://banco.exemplo/fatura?id=</span>
+                            <input id="idor-input" type="text" value="101" class="w-24 p-1 rounded focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono">
+                        </div>
+                        <div id="idor-result" class="mt-4 p-4 rounded-lg transition-all">
+                            <!-- JS will populate this -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Playbook -->
+        <section id="playbook" class="py-16 bg-slate-50 rounded-lg">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900">O Manual do Defensor</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">Construir um controle de acesso robusto se baseia em princípios de segurança fundamentais. Estes são os pilares que devem sustentar sua arquitetura.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="flex items-center justify-center h-12 w-12 rounded-full bg-sky-100 text-sky-600">
+                        <span>🛡️</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Menor Privilégio (PoLP)</h3>
+                    <p class="mt-2 text-sm text-slate-600">Conceda a cada usuário ou processo apenas as permissões mínimas necessárias para executar sua tarefa. Nada mais.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-sky-100 text-sky-600">
+                        <span>⛔</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Negar por Padrão</h3>
+                    <p class="mt-2 text-sm text-slate-600">Se uma permissão não for explicitamente concedida, o acesso deve ser negado. A segurança deve ser um opt-in.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-sky-100 text-sky-600">
+                        <span>🖥️</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Validação no Servidor</h3>
+                    <p class="mt-2 text-sm text-slate-600">Toda decisão de controle de acesso deve ser validada no backend. A segurança no cliente é apenas UX, não uma barreira real.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                     <div class="flex items-center justify-center h-12 w-12 rounded-full bg-sky-100 text-sky-600">
+                        <span>⚙️</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Modelos de Acesso</h3>
+                    <p class="mt-2 text-sm text-slate-600">Use modelos como RBAC (Baseado em Papéis) ou ABAC (Baseado em Atributos) para gerenciar permissões de forma escalável.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Tech -->
+        <section id="tech" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900">Análise por Tecnologia</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">Cada framework e linguagem tem suas próprias armadilhas e melhores práticas. Selecione uma tecnologia para ver vulnerabilidades comuns e como mitigá-las.</p>
+            </div>
+            
+            <div class="flex justify-center flex-wrap gap-3 mb-8">
+                <button data-tech="nodejs" class="tech-button active px-4 py-2 bg-white border border-slate-300 rounded-full font-semibold text-slate-700 hover:bg-slate-100 transition">Node.js / Express</button>
+                <button data-tech="react" class="tech-button px-4 py-2 bg-white border border-slate-300 rounded-full font-semibold text-slate-700 hover:bg-slate-100 transition">React / React Native</button>
+                <button data-tech="nextjs" class="tech-button px-4 py-2 bg-white border border-slate-300 rounded-full font-semibold text-slate-700 hover:bg-slate-100 transition">Next.js</button>
+                <button data-tech="python" class="tech-button px-4 py-2 bg-white border border-slate-300 rounded-full font-semibold text-slate-700 hover:bg-slate-100 transition">Python (Django/Flask)</button>
+            </div>
+
+            <div id="tech-content-container" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <!-- JS will populate this -->
+            </div>
+        </section>
+
+        <!-- Section 5: Testing -->
+        <section id="testing" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900">Como Encontrar Falhas</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">A identificação de falhas de acesso requer uma combinação de testes manuais e automação. Explore as principais técnicas abaixo.</p>
+            </div>
+            <div class="max-w-4xl mx-auto space-y-4">
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <h3 class="accordion-header w-full text-left font-semibold p-5 cursor-pointer flex justify-between items-center text-slate-800">
+                        Testes Manuais (Pentest)
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </h3>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-slate-200 text-slate-600">
+                            <p>É a forma mais eficaz, pois um humano entende a lógica do negócio.</p>
+                            <ul class="list-disc list-inside mt-4 space-y-2">
+                                <li><strong>Manipulação de IDs e Parâmetros (IDOR):</strong> Alterar sistematicamente todos os IDs em URLs e requisições para tentar acessar dados de outros usuários.</li>
+                                <li><strong>Navegação Forçada:</strong> Tentar acessar URLs que não são linkadas na UI, como `/admin`, `/backup`, ou arquivos como `.git/config`.</li>
+                                <li><strong>Adulteração de Tokens JWT:</strong> Decodificar o token, alterar o payload (ex: `role: 'user'` para `role: 'admin'`) e reenviá-lo, esperando que o servidor não valide a assinatura.</li>
+                                <li><strong>Manipulação de Cookies e Verbos HTTP:</strong> Alterar cookies de permissão no navegador ou tentar verbos HTTP diferentes (`PUT`, `DELETE`) em endpoints protegidos contra `GET`/`POST`.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <h3 class="accordion-header w-full text-left font-semibold p-5 cursor-pointer flex justify-between items-center text-slate-800">
+                        Limitações do SAST & DAST
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </h3>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-slate-200 text-slate-600">
+                            <p class="font-bold">Ferramentas automatizadas falham em entender o contexto.</p>
+                            <p class="mt-2">Broken Access Control é uma vulnerabilidade de <strong>lógica de negócio</strong>. Uma ferramenta DAST pode ver que `GET /faturas/123` e `GET /faturas/124` retornam `200 OK`, mas ela não sabe que o usuário logado só deveria ter permissão para ver a fatura 123.</p>
+                            <p class="mt-4">Elas podem ajudar a encontrar a <strong>ausência</strong> de uma chamada de controle de acesso, mas não conseguem validar se a lógica, quando presente, está <strong>correta</strong>. São um complemento, não um substituto para testes manuais.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <h3 class="accordion-header w-full text-left font-semibold p-5 cursor-pointer flex justify-between items-center text-slate-800">
+                        Revisão de Código Segura (Checklist)
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </h3>
+                    <div class="accordion-content">
+                        <div class="p-5 border-t border-slate-200 text-slate-600">
+                             <p>A revisão de código por pares é uma das defesas mais eficazes. O que procurar:</p>
+                            <ul class="list-disc list-inside mt-4 space-y-2">
+                                <li><strong>Validação em TODA Requisição:</strong> Cada endpoint protegido tem uma verificação de autorização explícita?</li>
+                                <li><strong>Lógica Centralizada:</strong> A lógica de permissão está em um middleware/biblioteca reutilizável ou espalhada pela aplicação?</li>
+                                <li><strong>Uso de IDs:</strong> Queries ao banco de dados filtram pelo ID do objeto E pelo ID do usuário logado? (`WHERE id = ? AND owner_id = ?`)</li>
+                                <li><strong>Manipulação de JWTs:</strong> O código usa `jwt.verify()` (seguro) ou `jwt.decode()` (inseguro)?</li>
+                                <li><strong>Tratamento de Erros:</strong> Blocos `catch` negam o acesso por padrão?</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-400">
+            <p>Aplicação Interativa sobre A01:2021 - Broken Access Control.</p>
+            <p class="mt-1">Conteúdo baseado no OWASP Top 10 e em análises de segurança de aplicações.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart.js - Prevalence Chart
+            const ctx = document.getElementById('prevalenceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['A01: Broken Access Control', 'A02: Cryptographic Failures', 'A03: Injection', 'A04: Insecure Design', 'A05: Security Misconfiguration'],
+                    datasets: [{
+                        label: '% de Aplicações com a Falha',
+                        data: [94, 73, 68, 65, 61], // Data from OWASP Top 10 2021 for context
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.6)', // red-500
+                            'rgba(59, 130, 246, 0.6)', // blue-500
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(59, 130, 246, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.raw}% das aplicações`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Attack Tabs
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.id.replace('tab-', 'content-');
+                    
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'text-sky-600', 'border-sky-600');
+                        btn.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                    });
+                    
+                    button.classList.add('active', 'text-sky-600', 'border-sky-600');
+                    button.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+
+                    tabContents.forEach(content => {
+                        if (content.id === targetId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            // IDOR example
+            const idorInput = document.getElementById('idor-input');
+            const idorResult = document.getElementById('idor-result');
+            const myId = '101';
+
+            function checkIdor() {
+                const currentId = idorInput.value;
+                if (currentId === myId) {
+                    idorResult.innerHTML = `
+                        <p class="font-bold text-green-800">Acesso Permitido:</p>
+                        <p class="text-green-700">Visualizando a fatura de ID ${currentId}. Este é o seu recurso, o acesso está correto.</p>`;
+                    idorResult.className = 'mt-4 p-4 rounded-lg transition-all bg-green-50 border border-green-200';
+                } else {
+                    idorResult.innerHTML = `
+                        <p class="font-bold text-red-800">Falha de Controle de Acesso!</p>
+                        <p class="text-red-700">Você acessou a fatura de ID ${currentId}, que pertence a outro usuário. O sistema falhou em verificar a propriedade do recurso.</p>`;
+                    idorResult.className = 'mt-4 p-4 rounded-lg transition-all bg-red-50 border border-red-200';
+                }
+            }
+            idorInput.addEventListener('input', checkIdor);
+            checkIdor();
+
+
+            // Accordion
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = header.querySelector('span');
+
+                header.addEventListener('click', () => {
+                    const isOpened = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    if (isOpened) {
+                        content.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // Tech content
+            const techButtons = document.querySelectorAll('.tech-button');
+            const techContentContainer = document.getElementById('tech-content-container');
+
+            const techData = {
+                nodejs: {
+                    title: "Node.js & Express.js",
+                    vulnerability: `A natureza minimalista do Express significa que a segurança é responsabilidade do desenvolvedor. Falhas comuns incluem a ordem incorreta de middlewares (uma verificação de segurança declarada depois de uma rota) e a falta de verificação de autorização granular, verificando apenas se o usuário está logado, mas não se ele tem o papel (role) correto.`,
+                    codeTitle: "Estudo de Caso: Escalada de Privilégios via JWT",
+                    vulnerableCode: `
+<span class="comment">// Middleware VULNERÁVEL</span>
+<span class="keyword">function</span> <span class="function">authenticateToken</span>(req, res, next) {
+  <span class="keyword">const</span> token = req.headers[<span class="string">'authorization'</span>];
+  <span class="error">
+  <span class="comment">// ERRO GRAVE: jwt.decode() não verifica a assinatura!</span>
+  <span class="keyword">const</span> userPayload = jwt.decode(token); 
+  req.user = userPayload; <span class="comment">// Confia cegamente no payload</span>
+  </span>
+  next();
+}`,
+                    fixedCode: `
+<span class="comment">// Middleware CORRIGIDO</span>
+<span class="keyword">function</span> <span class="function">authenticateToken</span>(req, res, next) {
+  <span class="keyword">const</span> token = req.headers[<span class="string">'authorization'</span>];
+  <span class="success">
+  <span class="comment">// CORRETO: jwt.verify() valida a assinatura com a chave secreta</span>
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    <span class="keyword">if</span> (err) <span class="keyword">return</span> res.sendStatus(403); <span class="comment">// Token inválido</span>
+    req.user = user;
+    next();
+  });
+  </span>
+}`,
+                    mitigation: ["Use bibliotecas dedicadas como <strong>accesscontrol</strong> ou <strong>Casbin</strong> para RBAC/ABAC.", "Sempre valide a assinatura de JWTs com <code>jwt.verify()</code>.", "Use <strong>Helmet</strong> para definir cabeçalhos HTTP de segurança."]
+                },
+                react: {
+                    title: "React & React Native",
+                    vulnerability: `O erro mais fundamental é confiar na lógica do cliente para a segurança. Ocultar um botão em React (ex: <code>{user.role === 'admin' && &lt;AdminButton /&gt;}</code>) é apenas UX, não segurança. Um atacante pode ignorar a UI e chamar a API diretamente.`,
+                    codeTitle: "Onde o Controle Deve Estar",
+                    vulnerableCode: `
+<span class="comment">// NO CLIENTE (REACT) - INSEGURO</span>
+<span class="error">
+<span class="keyword">if</span> (user.role === <span class="string">'admin'</span>) {
+  <span class="comment">// Mostra um botão sensível</span>
+}
+</span>
+<span class="comment">// O atacante simplesmente encontra a chamada de API no código JS...</span>
+fetch(<span class="string">'/api/delete-user/123'</span>, { method: <span class="string">'POST'</span> });
+`,
+                    fixedCode: `
+<span class="comment">// NO SERVIDOR (BACKEND) - SEGURO</span>
+<span class="success">
+router.post(<span class="string">'/api/delete-user/:id'</span>, (req, res) => {
+  <span class="keyword">if</span> (!req.user || req.user.role !== <span class="string">'admin'</span>) {
+    <span class="keyword">return</span> res.status(403).send(<span class="string">'Acesso negado'</span>);
+  }
+  <span class="comment">// ...lógica para deletar usuário</span>
+});
+</span>
+`,
+                    mitigation: ["<strong>TODA</strong> lógica de autorização deve residir no backend.", "Em React Native, <strong>NUNCA</strong> use <code>AsyncStorage</code> para tokens. Use <strong>Keychain (iOS)</strong> e <strong>Keystore (Android)</strong> através de bibliotecas como <code>react-native-keychain</code>.", "Não embuta chaves de API no código do cliente; use um proxy no seu backend."]
+                },
+                nextjs: {
+                    title: "Next.js",
+                    vulnerability: `As abstrações do Next.js (Middlewares, SSR) criam novos vetores de ataque. Um erro crítico é o vazamento de dados sensíveis via <code>getServerSideProps</code>, onde dados buscados no servidor são enviados ao cliente como JSON, ficando visíveis no código-fonte da página.`,
+                    codeTitle: "Vazamento de Dados via getServerSideProps",
+                    vulnerableCode: `
+<span class="keyword">export async function</span> <span class="function">getServerSideProps</span>(context) {
+  <span class="keyword">const</span> user = <span class="keyword">await</span> db.findUser(...); <span class="comment">// Busca o objeto completo</span>
+  <span class="error">
+  <span class="comment">// ERRO GRAVE: O objeto 'user' inteiro, com hash de senha,</span>
+  <span class="comment">// tokens, etc., é passado para os props e exposto ao cliente.</span>
+  <span class="keyword">return</span> { props: { user } };
+  </span>
+}
+`,
+                    fixedCode: `
+<span class="keyword">export async function</span> <span class="function">getServerSideProps</span>(context) {
+  <span class="keyword">const</span> user = <span class="keyword">await</span> db.findUser(...);
+  <span class="success">
+  <span class="comment">// CORRETO: Crie um novo objeto contendo APENAS</span>
+  <span class="comment">// os dados públicos necessários para a UI.</span>
+  <span class="keyword">const</span> publicUserData = {
+    name: user.name,
+    email: user.email,
+  };
+  <span class="keyword">return</span> { props: { user: publicUserData } };
+  </span>
+}
+`,
+                    mitigation: ["Nunca passe objetos de dados inteiros do banco para os <code>props</code>. Filtre e exponha apenas o necessário.", "Implemente <strong>Defesa em Profundidade</strong>: adicione verificações de autorização no Middleware, em <code>getServerSideProps</code> e em cada API Route.", "Use bibliotecas como <strong>NextAuth.js</strong> para gerenciar autenticação e sessões de forma segura."]
+                },
+                python: {
+                    title: "Python (Django/Flask)",
+                    vulnerability: `Em Django, o erro clássico é o IDOR através do ORM, buscando um objeto apenas pelo seu ID sem verificar o proprietário. Em Flask, por ser minimalista, a vulnerabilidade mais comum é a omissão completa de controle de acesso em um endpoint.`,
+                    codeTitle: "IDOR em Django (Vulnerável vs. Corrigido)",
+                    vulnerableCode: `
+<span class="comment"># views.py (Vulnerável)</span>
+<span class="keyword">def</span> <span class="function">invoice_details</span>(request, invoice_id):
+  <span class="error">
+  <span class="comment"># Busca a fatura apenas pelo ID, sem verificar o dono.</span>
+  invoice = Invoice.objects.get(pk=invoice_id)
+  </span>
+  <span class="keyword">return</span> render(...)
+`,
+                    fixedCode: `
+<span class="comment"># views.py (Corrigido)</span>
+<span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> get_object_or_404
+<span class="keyword">@login_required</span>
+<span class="keyword">def</span> <span class="function">invoice_details</span>(request, invoice_id):
+  <span class="success">
+  <span class="comment"># CORREÇÃO: Filtra pelo ID da fatura E pelo proprietário.</span>
+  invoice = get_object_or_404(Invoice, pk=invoice_id, owner=request.user)
+  </span>
+  <span class="keyword">return</span> render(...)
+`,
+                    mitigation: ["<strong>Django:</strong> Sempre filtre QuerySets pelo proprietário (<code>owner=request.user</code>). Configure o DRF para usar <code>IsAuthenticated</code> como permissão padrão.", "<strong>Flask:</strong> Não reinvente a roda. Use extensões como <strong>Flask-Security-Too</strong> ou <strong>Flask-Authorize</strong> para implementar segurança.", "Para ambos, use o sistema de permissões nativo ou bibliotecas de RBAC em vez de lógica de <code>if/else</code> espalhada."]
+                }
+            };
+            
+            function renderTechContent(tech) {
+                const data = techData[tech];
+                techContentContainer.innerHTML = `
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">${data.title}</h3>
+                    <p class="text-slate-600 mb-6">${data.vulnerability}</p>
+                    
+                    <h4 class="font-semibold text-slate-700 mb-4">${data.codeTitle}</h4>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <p class="mb-2 text-sm font-medium text-red-600">Código Vulnerável</p>
+                            <div class="code-block">${data.vulnerableCode}</div>
+                        </div>
+                        <div>
+                             <p class="mb-2 text-sm font-medium text-green-600">Código Corrigido</p>
+                            <div class="code-block">${data.fixedCode}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t border-slate-200 pt-6">
+                        <h4 class="font-semibold text-slate-700 mb-2">Recomendações de Mitigação</h4>
+                        <ul class="list-disc list-inside text-slate-600 space-y-2">
+                            ${data.mitigation.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            techButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tech = button.dataset.tech;
+                    techButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    renderTechContent(tech);
+                });
+            });
+
+            // Initial render
+            renderTechContent('nodejs');
+        });
+    </script>
+</body>
+</html>
