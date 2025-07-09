@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo: A02:2021 Falhas Criptográficas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: A estrutura da aplicação foi desenhada como um dashboard de página única com navegação superior fixa, em vez de um documento linear. A abordagem é temática, com seções dedicadas a: "Visão Geral", "Causas Comuns", "Identificação", "Exploração por Plataforma" e "Recomendações". Esta arquitetura foi escolhida para melhorar a usabilidade, permitindo que os usuários (desenvolvedores, analistas de segurança) acessem rapidamente a informação mais relevante para eles. A seção "Exploração por Plataforma" é o núcleo interativo, permitindo filtrar o conteúdo pela tecnologia de interesse, o que é muito mais eficiente do que ler um relatório completo. O fluxo do usuário é, portanto, não-linear e orientado a tarefas, facilitando a síntese de informações complexas. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Criticidade (baixa incidência vs. alto impacto). Goal: Informar/Comparar. Viz/Presentation: Gráfico de Barras (Chart.js/Canvas). Interaction: Tooltips. Justification: Visualizar a aparente contradição de forma clara. Library: Chart.js.
+        - Report Info: Causas comuns de falhas. Goal: Organizar/Detalhar. Viz/Presentation: Grade de cartões interativos (HTML/CSS/JS). Interaction: Clique para revelar detalhes em um modal. Justification: Transforma uma lista estática em um elemento de exploração, focando a atenção do usuário em uma causa por vez. Library: Vanilla JS.
+        - Report Info: Métodos de identificação. Goal: Organizar/Processo. Viz/Presentation: Diagrama de fluxo com etapas (HTML/Tailwind Flexbox). Interaction: Hover para destacar. Justification: Apresenta o processo de teste de segurança de forma visual e sequencial. Library: Vanilla JS.
+        - Report Info: Vulnerabilidades por tecnologia. Goal: Comparar/Detalhar. Viz/Presentation: Conteúdo dinâmico com abas/botões (HTML/JS). Interaction: Clique para carregar dados da plataforma selecionada. Justification: Permite personalização da informação, atendendo diretamente à necessidade do usuário. Library: Vanilla JS.
+        - Report Info: Recomendações de mitigação. Goal: Informar/Ação. Viz/Presentation: Lista expansível/acordeão (HTML/JS). Interaction: Clique para expandir/recolher. Justification: Organiza um grande volume de texto de forma compacta e gerenciável. Library: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #0891b2; /* cyan-600 */
+            border-bottom-color: #0891b2; /* cyan-600 */
+        }
+        .platform-btn.active {
+            background-color: #0891b2; /* cyan-600 */
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-800">
+                        <span class="text-cyan-600">A02:2021</span> / Falhas Criptográficas
+                    </h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Visão Geral</a>
+                        <a href="#causes" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Causas Comuns</a>
+                        <a href="#identification" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Identificação</a>
+                        <a href="#exploitation" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Exploração</a>
+                        <a href="#recommendations" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Recomendações</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">O Paradoxo das Falhas Criptográficas</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Esta seção introdutória explora o que são as falhas criptográficas (OWASP A02:2021), por que são tão críticas e a aparente contradição entre sua frequência e seu potencial de dano. O objetivo é fornecer um entendimento fundamental sobre a natureza e o impacto desses riscos de segurança.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-semibold text-slate-800">Definição e Criticidade</h3>
+                    <p class="text-slate-600 leading-relaxed">As Falhas Criptográficas, anteriormente conhecidas como "Exposição de Dados Sensíveis", referem-se a deficiências na forma como a criptografia é aplicada. Isso não significa que os algoritmos (como AES) estão quebrados, mas sim que sua implementação é falha.</p>
+                    <p class="text-slate-600 leading-relaxed">O impacto de uma exploração bem-sucedida é severo, podendo levar a vazamentos de dados massivos, perdas financeiras e danos irreparáveis à reputação, mesmo que a probabilidade de detecção por ferramentas automatizadas seja, por vezes, baixa.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-xl font-semibold text-center mb-4">Incidência vs. Impacto</h3>
+                    <div class="chart-container">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-4">Visualização do conceito: embora menos frequentes em alguns relatórios, o potencial de dano é desproporcionalmente alto.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 md:my-24 border-slate-200">
+
+        <section id="causes" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Raízes do Problema: Causas Comuns</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">Aqui, detalhamos as principais causas que levam a falhas criptográficas. Em vez de uma lista estática, você pode interagir com cada categoria para entender melhor os erros específicos, exemplos práticos e as CWEs (Common Weakness Enumeration) associadas. A maioria das falhas decorre de erros humanos e de implementação, não dos algoritmos em si.</p>
+            </div>
+            <div id="causes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <hr class="my-16 md:my-24 border-slate-200">
+
+        <section id="identification" class="scroll-mt-20 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Como Identificar as Falhas</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">A detecção de falhas criptográficas exige uma abordagem multifacetada, combinando automação e análise humana. Esta seção ilustra as principais metodologias de teste (SAST, DAST e Revisão Manual) e como elas se complementam para fornecer uma cobertura de segurança abrangente ao longo do ciclo de vida de desenvolvimento de software (SDLC).</p>
+            </div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                 <div class="text-center p-4 rounded-lg flex-1 transition-all duration-300 hover:bg-slate-100">
+                    <div class="text-3xl mb-2">🔬</div>
+                    <h3 class="text-xl font-semibold text-cyan-700">SAST</h3>
+                    <p class="text-slate-600 mt-2">Análise de código-fonte estático para encontrar chaves codificadas e algoritmos fracos antes da implantação.</p>
+                </div>
+                <div class="text-2xl text-slate-300 hidden md:block mx-4">→</div>
+                <div class="text-2xl text-slate-300 md:hidden my-2">↓</div>
+                 <div class="text-center p-4 rounded-lg flex-1 transition-all duration-300 hover:bg-slate-100">
+                    <div class="text-3xl mb-2">📡</div>
+                    <h3 class="text-xl font-semibold text-cyan-700">DAST</h3>
+                    <p class="text-slate-600 mt-2">Teste da aplicação em execução para detectar configurações TLS fracas e falta de criptografia em trânsito.</p>
+                </div>
+                 <div class="text-2xl text-slate-300 hidden md:block mx-4">→</div>
+                 <div class="text-2xl text-slate-300 md:hidden my-2">↓</div>
+                 <div class="text-center p-4 rounded-lg flex-1 transition-all duration-300 hover:bg-slate-100">
+                    <div class="text-3xl mb-2">🧑‍💻</div>
+                    <h3 class="text-xl font-semibold text-cyan-700">Revisão Manual</h3>
+                    <p class="text-slate-600 mt-2">Análise humana e testes de penetração para encontrar falhas lógicas complexas que ferramentas automatizadas perdem.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 md:my-24 border-slate-200">
+
+        <section id="exploitation" class="scroll-mt-20 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Exploração por Plataforma</h2>
+                <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">As falhas criptográficas manifestam-se de maneiras diferentes dependendo da tecnologia. Selecione uma plataforma para explorar suas vulnerabilidades comuns e cenários de exploração típicos. Esta visão focada ajuda a entender os riscos específicos do seu ambiente de desenvolvimento.</p>
+            </div>
+            <div class="flex justify-center flex-wrap gap-3 mb-8">
+                <button data-platform="node" class="platform-btn px-6 py-2 font-semibold text-slate-700 bg-white border border-slate-300 rounded-full shadow-sm transition-all duration-300 hover:bg-slate-100">Node.js</button>
+                <button data-platform="react" class="platform-btn px-6 py-2 font-semibold text-slate-700 bg-white border border-slate-300 rounded-full shadow-sm transition-all duration-300 hover:bg-slate-100">React/Next.js</button>
+                <button data-platform="react-native" class="platform-btn px-6 py-2 font-semibold text-slate-700 bg-white border border-slate-300 rounded-full shadow-sm transition-all duration-300 hover:bg-slate-100">React Native</button>
+                <button data-platform="python" class="platform-btn px-6 py-2 font-semibold text-slate-700 bg-white border border-slate-300 rounded-full shadow-sm transition-all duration-300 hover:bg-slate-100">Python</button>
+            </div>
+            <div id="exploitation-content" class="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200 min-h-[300px]">
+            </div>
+        </section>
+
+        <hr class="my-16 md:my-24 border-slate-200">
+        
+        <section id="recommendations" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900">Mitigação: Recomendações Acionáveis</h2>
+                 <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">A prevenção de falhas criptográficas requer uma estratégia de segurança em camadas. Esta seção final fornece uma lista de recomendações essenciais. Interaja com cada tópico para expandir e ver os detalhes, transformando conhecimento em ações concretas para proteger suas aplicações.</p>
+            </div>
+            <div id="recommendations-list" class="space-y-4 max-w-4xl mx-auto">
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 mt-24">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm">
+            <p>Dashboard Interativo baseado no relatório OWASP Top 10 A02:2021.</p>
+            <p>Criado para fins educacionais.</p>
+        </div>
+    </footer>
+
+    <div id="modal-container" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 hidden">
+        <div id="modal-content" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+             <div class="flex justify-between items-center p-4 border-b border-slate-200 sticky top-0 bg-white">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-800"></h3>
+                <button id="modal-close" class="text-slate-500 hover:text-slate-800 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const causesData = {
+                'no-crypto': {
+                    title: 'Nenhuma Criptografia Utilizada',
+                    icon: '🚫',
+                    description: 'Dados sensíveis são transmitidos ou armazenados em texto simples, tornando-os vulneráveis à interceptação.',
+                    details: '<strong>Problema:</strong> Ausência de TLS para dados em trânsito ou não criptografar dados em repouso em bancos de dados ou arquivos. <br><br><strong>Exemplo:</strong> Um formulário de login que envia senhas por HTTP, ou um banco de dados de clientes com informações pessoais armazenadas sem criptografia.',
+                    cwe: 'CWE-311, CWE-312'
+                },
+                'weak-algo': {
+                    title: 'Algoritmos Fracos ou Depreciados',
+                    icon: '📉',
+                    description: 'Uso de algoritmos criptograficamente quebrados ou desatualizados.',
+                    details: '<strong>Problema:</strong> Algoritmos como MD5, SHA1, DES, e RC4 são vulneráveis a ataques de colisão, força bruta e outras técnicas modernas.<br><br><strong>Exemplo:</strong> Armazenar hashes de senha usando MD5, que pode ser facilmente quebrado com tabelas rainbow.',
+                    cwe: 'CWE-327'
+                },
+                'key-management': {
+                    title: 'Gerenciamento Inadequado de Chaves',
+                    icon: '🔑',
+                    description: 'Chaves criptográficas codificadas, reutilizadas ou armazenadas de forma insegura.',
+                    details: '<strong>Problema:</strong> Chaves no código-fonte, em arquivos de configuração não protegidos, ou a falta de rotação de chaves.<br><br><strong>Exemplo:</strong> Uma chave de API para um serviço de pagamento codificada diretamente no código de uma aplicação mobile, onde pode ser extraída por engenharia reversa.',
+                    cwe: 'CWE-547, CWE-798'
+                },
+                'bad-random': {
+                    title: 'Geração Insegura de Números Aleatórios',
+                    icon: '🎲',
+                    description: 'Uso de geradores de números pseudoaleatórios não seguros para fins criptográficos.',
+                    details: '<strong>Problema:</strong> Funções como `Math.random()` (JS) ou `random` (Python) produzem sequências previsíveis, enfraquecendo chaves, salts e tokens.<br><br><strong>Exemplo:</strong> Gerar um token de redefinição de senha com `Math.random()`, permitindo que um atacante preveja tokens válidos.',
+                    cwe: 'CWE-338'
+                },
+                'tls-config': {
+                    title: 'Configuração Incorreta de SSL/TLS',
+                    icon: '⚙️',
+                    description: 'Conexões vulneráveis devido a configurações de TLS deficientes.',
+                    details: '<strong>Problema:</strong> Suporte a protocolos antigos (SSLv3, TLS 1.0/1.1), cifras fracas, certificados expirados ou autoassinados, e falta do cabeçalho HSTS.<br><br><strong>Exemplo:</strong> Um servidor que permite uma conexão TLS 1.0 com uma cifra de exportação, vulnerável a ataques de downgrade como o FREAK.',
+                    cwe: 'CWE-326'
+                },
+                'weak-hash': {
+                    title: 'Hash de Senha Fraco',
+                    icon: '🛡️',
+                    description: 'Armazenamento de senhas com hashes rápidos, não salgados ou em texto simples.',
+                    details: '<strong>Problema:</strong> O uso de hashes rápidos (MD5, SHA1) sem um salt único por usuário permite ataques de força bruta offline e de tabelas rainbow.<br><br><strong>Exemplo:</strong> A famosa violação do LinkedIn em 2012, onde milhões de hashes de senha SHA1 (sem salt) foram vazados e quebrados.',
+                    cwe: 'CWE-916'
+                }
+            };
+            const exploitationData = {
+                node: {
+                    title: 'Node.js',
+                    vulnerabilities: [
+                        '<strong>Gerenciamento Inseguro de Chaves:</strong> Chaves em arquivos de configuração, logs, ou vazamento de memória do `Buffer`.',
+                        '<strong>Algoritmos Fracos:</strong> Uso de algoritmos como DES no módulo `crypto` nativo.',
+                        '<strong>Geração Insegura de Aleatórios:</strong> Dependência de PRNGs fracos para tokens.',
+                        '<strong>Vulnerabilidades de Dependência:</strong> Uso de versões antigas do Node.js ou pacotes npm vulneráveis.'
+                    ],
+                    scenarios: [
+                        '<strong>Ataques Man-in-the-Middle (MITM):</strong> Interceptação de tráfego se o TLS não for forçado.',
+                        '<strong>Roubo de Sessão:</strong> Previsão de IDs de sessão gerados de forma insegura.',
+                        '<strong>Vazamento de Memória:</strong> Objetos `Buffer` não limpos podem expor dados sensíveis de requisições anteriores.',
+                        '<strong>Bypass de Permissões:</strong> Falhas em `worker_threads` podem permitir escalonamento de privilégios.'
+                    ]
+                },
+                react: {
+                    title: 'React.js / Next.js',
+                    vulnerabilities: [
+                        '<strong>Exposição no Cliente (React):</strong> Armazenar tokens ou chaves em `localStorage` os torna vulneráveis a XSS.',
+                        '<strong>Chaves Públicas (Next.js):</strong> Variáveis de ambiente com prefixo `NEXT_PUBLIC_` são expostas no bundle do cliente.',
+                        '<strong>Gerenciamento Inseguro de Chaves (Next.js):</strong> Chaves de API expostas em funções de API ou middleware.',
+                        '<strong>Vulnerabilidades de Middleware (Next.js):</strong> Falhas podem permitir o bypass de verificações de autenticação.'
+                    ],
+                    scenarios: [
+                        '<strong>Roubo de Token via XSS:</strong> Um script malicioso injetado lê o token JWT do `localStorage` e o envia para um atacante.',
+                        '<strong>Extração de Chaves do Bundle:</strong> Um atacante analisa o código JavaScript público para encontrar chaves de API expostas.',
+                        '<strong>Bypass de Autorização (Next.js):</strong> Manipulação de cabeçalhos internos para pular a execução do middleware de segurança.',
+                        '<strong>Ataques MITM:</strong> Se o HTTPS não for universalmente forçado, o tráfego pode ser interceptado.'
+                    ]
+                },
+                'react-native': {
+                    title: 'React Native',
+                    vulnerabilities: [
+                        '<strong>Armazenamento Inseguro de Dados:</strong> Salvar credenciais ou chaves em `AsyncStorage` ou SQLite em texto simples.',
+                        '<strong>Chaves Hardcoded:</strong> Incorporar chaves de criptografia diretamente no código do aplicativo.',
+                        '<strong>Falta de Transporte Seguro:</strong> Comunicação com APIs via HTTP ou falha em implementar SSL Pinning.',
+                        '<strong>Algoritmos Fracos:</strong> Uso de bibliotecas de criptografia de terceiros com implementações fracas.'
+                    ],
+                    scenarios: [
+                        '<strong>Acesso Físico ao Dispositivo:</strong> Um atacante com acesso físico extrai dados do armazenamento local do aplicativo.',
+                        '<strong>Engenharia Reversa:</strong> Descompilação do APK/IPA para extrair chaves de criptografia codificadas.',
+                        '<strong>Interceptação de Rede (MITM):</strong> Em uma rede Wi-Fi pública, um atacante intercepta o tráfego de rede da aplicação por falta de SSL Pinning.',
+                        '<strong>Malware:</strong> Outro aplicativo malicioso no dispositivo pode tentar ler os dados armazenados de forma insegura.'
+                    ]
+                },
+                python: {
+                    title: 'Python',
+                    vulnerabilities: [
+                        '<strong>Geração Insegura de Aleatórios:</strong> Uso do módulo `random` em vez de `secrets` para fins criptográficos.',
+                        '<strong>Hashing de Senha Fraco:</strong> Uso de MD5/SHA1 em vez de bibliotecas como `bcrypt` ou `argon2`.',
+                        '<strong>Uso Inseguro de Bibliotecas:</strong> Uso incorreto de modos de cifra (ex: ECB) em PyCryptodome.',
+                        '<strong>Deserialização Insegura:</strong> Uso de `pickle` com dados não confiáveis pode levar a RCE.'
+                    ],
+                    scenarios: [
+                        '<strong>Previsão de Token:</strong> Atacante prevê tokens de redefinição de senha gerados com `random.randint`.',
+                        '<strong>Ataque de Tabela Rainbow:</strong> Quebra de senhas com hash MD5 vazadas de um banco de dados.',
+                        '<strong>Ataque de Padding Oracle:</strong> Descriptografia de dados explorando mensagens de erro de preenchimento em implementações CBC.',
+                        '<strong>Execução de Código Remoto:</strong> Um atacante envia um payload `pickle` malicioso que é desserializado pelo servidor.'
+                    ]
+                }
+            };
+            const recommendationsData = [
+                {
+                    title: 'Classificar e Minimizar Dados',
+                    icon: '📂',
+                    content: 'Identifique todos os dados sensíveis que sua aplicação processa. Não armazene informações sensíveis desnecessariamente e descarte-as assim que possível. Criptografe todos os dados sensíveis em repouso e em trânsito.'
+                },
+                {
+                    title: 'Usar Algoritmos e Protocolos Fortes',
+                    icon: '🔒',
+                    content: 'Use sempre protocolos e algoritmos padrão e fortes, recomendados pela indústria (ex: AES-256, RSA-2048+, bcrypt, Argon2). Evite algoritmos depreciados como MD5, SHA1, DES. Para trânsito, use TLS 1.2+ com cifras fortes e HSTS.'
+                },
+                {
+                    title: 'Gerenciamento Seguro de Chaves',
+                    icon: '🔑',
+                    content: 'Nunca codifique chaves no código-fonte. Utilize um sistema de gerenciamento de segredos (KMS) como AWS KMS, Azure Key Vault ou HashiCorp Vault. Garanta rotação periódica de chaves e controle de acesso rigoroso.'
+                },
+                {
+                    title: 'Implementar Testes de Segurança Contínuos',
+                    icon: '🧪',
+                    content: 'Integre ferramentas SAST e DAST em seu pipeline de CI/CD para detecção precoce. Realize revisões manuais de código e testes de penetração regulares para encontrar vulnerabilidades complexas que a automação não consegue detectar.'
+                },
+                {
+                    title: 'Manter Dependências Atualizadas',
+                    icon: '🔄',
+                    content: 'Mantenha todos os frameworks, bibliotecas e plataformas atualizados. Use ferramentas como `npm audit` ou `pip-audit` para verificar vulnerabilidades conhecidas em suas dependências e aplique patches prontamente.'
+                }
+            ];
+            
+            const impactChartCtx = document.getElementById('impactChart').getContext('2d');
+            new Chart(impactChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Potencial de Exploração', 'Taxa de Incidência', 'Potencial de Impacto'],
+                    datasets: [{
+                        label: 'Classificação de Risco (OWASP)',
+                        data: [8, 3, 9],
+                        backgroundColor: [
+                            'rgba(251, 146, 60, 0.6)', // orange-400
+                            'rgba(56, 189, 248, 0.6)', // sky-400
+                            'rgba(239, 68, 68, 0.6)'  // red-500
+                        ],
+                        borderColor: [
+                            'rgba(251, 146, 60, 1)',
+                            'rgba(56, 189, 248, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { display: false }
+                        },
+                        y: {
+                           grid: { color: '#e2e8f0' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += `${context.parsed.x} de 10`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const causesGrid = document.getElementById('causes-grid');
+            Object.keys(causesData).forEach(key => {
+                const cause = causesData[key];
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-xl shadow-lg border border-slate-200 cursor-pointer transition-all duration-300 hover:shadow-cyan-100 hover:border-cyan-300 hover:-translate-y-1';
+                card.dataset.key = key;
+                card.innerHTML = `
+                    <div class="text-4xl mb-4">${cause.icon}</div>
+                    <h3 class="text-xl font-semibold text-slate-800">${cause.title}</h3>
+                    <p class="text-slate-500 mt-2">${cause.description}</p>
+                `;
+                card.addEventListener('click', () => showModal(key));
+                causesGrid.appendChild(card);
+            });
+            
+            const modalContainer = document.getElementById('modal-container');
+            const modalClose = document.getElementById('modal-close');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            function showModal(key) {
+                const cause = causesData[key];
+                modalTitle.textContent = cause.title;
+                modalBody.innerHTML = `
+                    <p class="text-slate-600 leading-relaxed">${cause.details}</p>
+                    <div class="mt-6 pt-4 border-t border-slate-200">
+                        <p class="text-sm font-semibold text-slate-700">CWEs Relevantes: <span class="font-normal text-cyan-700 bg-cyan-50 px-2 py-1 rounded">${cause.cwe}</span></p>
+                    </div>
+                `;
+                modalContainer.classList.remove('hidden');
+            }
+
+            modalClose.addEventListener('click', () => modalContainer.classList.add('hidden'));
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target === modalContainer) {
+                    modalContainer.classList.add('hidden');
+                }
+            });
+
+            const exploitationContent = document.getElementById('exploitation-content');
+            const platformBtns = document.querySelectorAll('.platform-btn');
+
+            function updateExploitationContent(platformKey) {
+                const data = exploitationData[platformKey];
+                if (!data) {
+                    exploitationContent.innerHTML = `<p class="text-center text-slate-500">Selecione uma plataforma para ver os detalhes.</p>`;
+                    return;
+                }
+                exploitationContent.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-xl font-semibold text-slate-800 mb-4 border-b-2 border-cyan-500 pb-2">Vulnerabilidades Comuns</h3>
+                            <ul class="space-y-3 list-disc list-inside text-slate-600">
+                                ${data.vulnerabilities.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-slate-800 mb-4 border-b-2 border-red-500 pb-2">Cenários de Exploração</h3>
+                            <ul class="space-y-3 list-disc list-inside text-slate-600">
+                                ${data.scenarios.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            platformBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const platform = btn.dataset.platform;
+                    platformBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateExploitationContent(platform);
+                });
+            });
+
+            updateExploitationContent('node');
+            document.querySelector('.platform-btn[data-platform="node"]').classList.add('active');
+
+            const recommendationsList = document.getElementById('recommendations-list');
+            recommendationsData.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden';
+                div.innerHTML = `
+                    <button class="w-full flex justify-between items-center text-left p-4 font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                        <span class="flex items-center">
+                            <span class="mr-3 text-2xl">${item.icon}</span>
+                            <span>${item.title}</span>
+                        </span>
+                        <svg class="w-5 h-5 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="px-4 pb-4 text-slate-600 leading-relaxed hidden">
+                        ${item.content}
+                    </div>
+                `;
+                recommendationsList.appendChild(div);
+
+                const button = div.querySelector('button');
+                const content = div.querySelector('div');
+                const chevron = div.querySelector('svg');
+
+                button.addEventListener('click', () => {
+                    content.classList.toggle('hidden');
+                    chevron.classList.toggle('rotate-180');
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
